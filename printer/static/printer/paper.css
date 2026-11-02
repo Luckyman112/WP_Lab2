@@ -1,0 +1,120 @@
+/* Fanfold printer paper and ribbon colours. Also inlined into downloaded printouts. */
+
+.paper {
+  --sheet: #fbf9f1;
+  --bar: #d9ead2;
+  --ink: #1f1d19;
+  --faded: #8a8576;
+  --red: #a8261c;
+  --green: #2e6b2b;
+  --blue: #1d4f8f;
+  --violet: #6b3e91;
+  --margin: 2.6rem;
+  --line: 1.5rem;
+
+  position: relative;
+  padding: 0 var(--margin) 3rem;
+  background: var(--sheet);
+  color: var(--ink);
+  font-family: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  font-size: 0.84rem;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+/* tractor-feed holes and perforations down both edges */
+.paper::before,
+.paper::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--margin);
+  background-image: radial-gradient(circle, #2e2c28 0 0.28rem, rgba(0, 0, 0, 0.2) 0.3rem, transparent 0.34rem);
+  background-size: var(--margin) 1.5rem;
+  background-repeat: repeat-y;
+}
+.paper::before { left: 0; border-right: 1px dashed rgba(0, 0, 0, 0.16); }
+.paper::after { right: 0; border-left: 1px dashed rgba(0, 0, 0, 0.16); }
+
+.paper-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.4rem 0.75rem 0.75rem;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.2);
+  color: var(--faded);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+}
+
+.feed { overflow-x: auto; }
+
+.listing {
+  counter-reset: ln;
+  width: max-content;
+  min-width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.listing li {
+  counter-increment: ln;
+  display: flex;
+  height: var(--line);
+  padding-right: 1.5rem;
+  line-height: var(--line);
+  white-space: pre;
+  transition: background-color 0.4s;
+}
+
+.listing li::before {
+  content: counter(ln);
+  flex: none;
+  width: 4ch;
+  margin-right: 2ch;
+  color: var(--faded);
+  text-align: right;
+  user-select: none;
+}
+
+.listing code {
+  font: inherit;
+  text-shadow: 0 0 0.6px rgba(31, 29, 25, 0.5);
+}
+
+/* green bar paper alternates bands three lines deep */
+.paper-green { --bar: #d9ead2; }
+.paper-blue { --bar: #d5e1f0; }
+.paper-plain { --bar: transparent; }
+.listing li:nth-child(6n + 1),
+.listing li:nth-child(6n + 2),
+.listing li:nth-child(6n + 3) { background: var(--bar); }
+
+/* Ribbon: two-colour black/red, like the real ones */
+.ribbon-redblack :is(.k, .kc, .kd, .kn, .kp, .kr, .kt, .ow, .nd, .nt, .m, .mb, .mf, .mh, .mi, .il, .mo) { color: var(--red); }
+.ribbon-redblack :is(.c, .ch, .cm, .c1, .cs, .cpf, .sd) { color: var(--faded); font-style: italic; }
+
+/* Ribbon: carbon, black only */
+.ribbon-carbon :is(.k, .kc, .kd, .kn, .kp, .kr, .kt, .ow, .nt) { font-weight: 600; }
+.ribbon-carbon :is(.c, .ch, .cm, .c1, .cs, .cpf, .sd) { color: var(--faded); font-style: italic; }
+
+/* Ribbon: four colours */
+.ribbon-four :is(.k, .kc, .kd, .kn, .kp, .kr, .kt, .ow, .nd) { color: var(--red); }
+.ribbon-four :is(.s, .sa, .sb, .sc, .dl, .s2, .se, .sh, .si, .sx, .sr, .s1, .ss) { color: var(--green); }
+.ribbon-four :is(.m, .mb, .mf, .mh, .mi, .il, .mo, .cp, .na) { color: var(--violet); }
+.ribbon-four :is(.nf, .fm, .nc, .nb, .bp, .nn, .nt) { color: var(--blue); }
+.ribbon-four :is(.c, .ch, .cm, .c1, .cs, .cpf, .sd) { color: var(--faded); font-style: italic; }
+
+/* the print head strikes a line left to right in jerky steps */
+@keyframes lp-strike {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+.listing li.printing code { animation: lp-strike 0.32s steps(16, end) var(--d, 0ms) both; }
+.listing.unfed code { visibility: hidden; }
+
+@media (max-width: 640px) {
+  .paper { --margin: 1.6rem; font-size: 0.78rem; }
+  .paper-head { flex-wrap: wrap; }
+}

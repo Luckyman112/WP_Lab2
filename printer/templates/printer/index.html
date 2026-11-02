@@ -1,0 +1,128 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>{% if printout %}Job {{ printout.job_number }} · {% endif %}LP-1170</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans+Condensed:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'printer/paper.css' %}">
+  <link rel="stylesheet" href="{% static 'printer/console.css' %}">
+  <noscript><style>.listing.unfed code { visibility: visible; }</style></noscript>
+</head>
+<body>
+  <header class="console">
+    <a class="badge" href="{% url 'index' %}">
+      <span class="badge-model">LP-1170</span>
+      <span class="badge-sub">line printer &middot; syntax unit</span>
+    </a>
+
+    <ul class="lamps" aria-label="Printer status">
+      <li class="lamp" data-lamp="power">Power</li>
+      <li class="lamp" data-lamp="ready">Ready</li>
+      <li class="lamp" data-lamp="online">On line</li>
+      <li class="lamp lamp-amber" data-lamp="busy">Printing</li>
+    </ul>
+
+    <div class="counters">
+      <div class="counter">
+        <span class="counter-label">Lines</span>
+        <span class="counter-value" id="line-count">0000</span>
+      </div>
+      <div class="counter">
+        <span class="counter-label">Job</span>
+        <span class="counter-value">{% if printout %}{{ printout.job_number }}{% else %}----{% endif %}</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="bench">
+    <section class="deck" aria-label="Input">
+      <div class="deck-head">
+        <label for="source">Input deck</label>
+        <div class="lexer">
+          <label for="language">Lexer</label>
+          <select id="language">
+            <option value="auto"{% if chosen == 'auto' %} selected{% endif %}>Auto-detect</option>
+            {% for key, name in languages.items %}
+            <option value="{{ key }}"{% if chosen == key %} selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <textarea id="source" spellcheck="false" autocapitalize="off" autocomplete="off">{{ code }}</textarea>
+      <p class="readout">
+        <span id="lexer-readout">{% if result.detected %}auto &rarr; {% endif %}{{ result.label }}</span>
+        <span class="readout-hint">Tab indents &middot; Ctrl+Enter files the job</span>
+      </p>
+
+      <div class="switches">
+        <fieldset class="switch" data-target="ribbon">
+          <legend>Ribbon</legend>
+          <label><input type="radio" name="ribbon" value="redblack" checked><span>Black/red</span></label>
+          <label><input type="radio" name="ribbon" value="carbon"><span>Carbon</span></label>
+          <label><input type="radio" name="ribbon" value="four"><span>Colour</span></label>
+        </fieldset>
+        <fieldset class="switch" data-target="paper">
+          <legend>Paper</legend>
+          <label><input type="radio" name="paper" value="green" checked><span>Green bar</span></label>
+          <label><input type="radio" name="paper" value="blue"><span>Blue bar</span></label>
+          <label><input type="radio" name="paper" value="plain"><span>Plain</span></label>
+        </fieldset>
+      </div>
+
+      <div class="actions">
+        <input id="job-title" maxlength="80" placeholder="Job name (optional)" value="{{ printout.title|default:'' }}">
+        <button type="button" class="key key-red" id="tear">Tear off &amp; file</button>
+        <button type="button" class="key" id="copy">Copy text</button>
+        {% if printout %}<a class="key" href="{% url 'download' printout.slug %}">Download .html</a>{% endif %}
+      </div>
+      <p class="message" id="message" role="status"></p>
+
+      <section class="filed">
+        <h2>Filed printouts</h2>
+        {% if filed %}
+        <ol>
+          {% for job in filed %}
+          <li{% if job == printout %} class="current"{% endif %}>
+            <a href="{% url 'printout' job.slug %}">
+              <span class="filed-no">{{ job.job_number }}</span>
+              <span class="filed-title">{{ job.title|default:"untitled" }}</span>
+              <span class="filed-lang">{{ job.language }}</span>
+            </a>
+          </li>
+          {% endfor %}
+        </ol>
+        {% else %}
+        <p class="filed-empty">The tray is empty. Tear off a listing to file it here.</p>
+        {% endif %}
+      </section>
+    </section>
+
+    <section class="output" aria-label="Printout">
+      <div class="slot" aria-hidden="true"></div>
+      <article class="paper paper-green ribbon-redblack" id="paper">
+        <header class="paper-head">
+          <span>JOB {% if printout %}{{ printout.job_number }}{% else %}----{% endif %}</span>
+          <span id="paper-lang">{{ result.label|upper }}</span>
+          <span>{% if printout %}{{ printout.created|date:"Y-m-d H:i" }}{% else %}{{ today|date:"Y-m-d H:i" }} UNFILED{% endif %}</span>
+        </header>
+        <div class="feed">
+          <ol class="listing unfed" id="listing">{% for line in result.lines %}<li><code>{{ line|safe }}</code></li>{% endfor %}</ol>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  {{ result.lines|json_script:"initial-lines" }}
+  <script>
+    window.LP = {
+      highlightUrl: "{% url 'highlight' %}",
+      fileUrl: "{% url 'file' %}"
+    };
+  </script>
+  <script src="{% static 'printer/printer.js' %}"></script>
+</body>
+</html>
