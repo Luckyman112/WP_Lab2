@@ -11,7 +11,7 @@ that changed.
 
 | Student | Project Name | Brief project description | Framework | GitHub Link |
 |---|---|---|---|---|
-| _your name_ | LP-1170 Syntax Highlighter | Web app where you type code (15 languages, with auto-detection) and it is highlighted live on the server with Pygments. The result is shown as a line-printer listing; it can be saved ("filed"), reopened by link and downloaded as a standalone HTML file. | Django 6 + Pygments, vanilla JS | https://github.com/Luckyman112/WP_Lab2 |
+| _Sergejs Kravecs_ | LP-1170 Syntax Highlighter | Web app where you type code (15 languages, with auto-detection) and it is highlighted live on the server with Pygments. The result is shown as a line-printer listing; it can be saved ("filed"), reopened by link and downloaded as a standalone HTML file. | Django 6 + Pygments, vanilla JS | https://github.com/Luckyman112/WP_Lab2 |
 
 ## Dynamic elements
 
